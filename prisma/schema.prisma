@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id            String   @id @default(cuid())
+  name          String
+  prompt        String   @db.Text
+  imageUrls     String[]
+  channelUser   String   // upload-post username/user identifier
+  platform      String   // tiktok, instagram, youtube, etc.
+  isActive      Boolean  @default(true)
+  intervalHours Int      @default(4)
+  nextRunAt     DateTime
+  timezone      String   @default("Asia/Kuala_Lumpur")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  posts         Post[]
+}
+
+model Post {
+  id           String    @id @default(cuid())
+  campaignId   String
+  campaign     Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  status       String    @default("pending") // pending | generating | posting | done | failed
+  kieTaskId    String?
+  imageUsed    String?   @db.Text
+  videoUrl     String?   @db.Text
+  postUrl      String?   @db.Text
+  error        String?   @db.Text
+  scheduledAt  DateTime
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([campaignId])
+}
