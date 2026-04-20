@@ -7,3 +7,5 @@ worker/node_modules/
 .vercel/
 prisma/generated/
 *.log
+
+.vercel
