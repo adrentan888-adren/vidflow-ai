@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../node_modules/@prisma/client/default.js";
 import { createVideoTask, pollUntilDone } from "./kie.js";
 import { postVideo } from "./uploadpost.js";
 

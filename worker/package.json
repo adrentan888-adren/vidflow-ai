@@ -7,8 +7,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
-    "node-cron": "^3.0.3",
-    "prisma": "^5.22.0"
+    "node-cron": "^3.0.3"
   }
 }
