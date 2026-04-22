@@ -11,7 +11,7 @@ module.exports = {
       max_restarts: 10,
       env: {
         NODE_ENV: "production",
-        DATABASE_URL: "postgresql://neondb_owner:npg_4kxE3LbJDfKT@ep-blue-glitter-a1rt3x1g.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
+        DATABASE_URL: "postgresql://neondb_owner:npg_4kxE3LbJDfKT@ep-blue-glitter-a1rt3x1g-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&pgbouncer=true&connect_timeout=30",
         KIE_API_KEY: "beffa03440f306213b4d975c1946dcbc",
         UPLOAD_POST_API_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IndlbG92ZWFpOTk2QGdtYWlsLmNvbSIsImV4cCI6NDkyODU5NzIzOCwianRpIjoiMTU2OTNjYmYtODdmMy00ODM3LTk3ZjItZDMwNjcyZjk3ODNkIn0.9EBSnbpuCT8lGCCTtDiyjWWRjQrM2FLkon39ORB7UYY",
       },
