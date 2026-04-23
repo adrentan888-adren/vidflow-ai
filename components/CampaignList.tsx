@@ -2,10 +2,13 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import EditCampaignModal from "./EditCampaignModal";
 
 interface Campaign {
   id: string;
   name: string;
+  prompt: string;
+  imageUrls: string[];
   platform: string;
   channelUser: string;
   isActive: boolean;
@@ -23,6 +26,7 @@ const platformIcons: Record<string, string> = {
 export default function CampaignList({ initialCampaigns }: { initialCampaigns: Campaign[] }) {
   const router = useRouter();
   const [campaigns, setCampaigns] = useState(initialCampaigns);
+  const [editing, setEditing] = useState<Campaign | null>(null);
 
   async function toggle(id: string, isActive: boolean) {
     const res = await fetch(`/api/campaigns/${id}`, {
@@ -46,55 +50,76 @@ export default function CampaignList({ initialCampaigns }: { initialCampaigns: C
     }
   }
 
+  function handleSaved(updated: Campaign) {
+    setCampaigns((c) => c.map((x) => x.id === updated.id ? { ...x, ...updated } : x));
+    setEditing(null);
+  }
+
   const statusColor: Record<string, string> = {
     done: "text-emerald-400", failed: "text-rose-400",
     generating: "text-yellow-400", posting: "text-blue-400", pending: "text-slate-400",
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      {campaigns.map((c) => {
-        const lastPost = c.posts[0];
-        const nextRun = new Date(c.nextRunAt).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" });
-        return (
-          <div key={c.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span>{platformIcons[c.platform] ?? "📱"}</span>
-                <p className="font-medium">{c.name}</p>
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${c.isActive ? "bg-emerald-900/50 text-emerald-400" : "bg-slate-800 text-slate-500"}`}>
-                  {c.isActive ? "active" : "paused"}
-                </span>
-              </div>
-              <p className="text-slate-500 text-xs">
-                Every {c.intervalHours}h · @{c.channelUser} · {c._count.posts} posts total
-              </p>
-              <p className="text-slate-600 text-xs mt-0.5">
-                Next run: {nextRun}
-                {lastPost && (
-                  <span className="ml-2">
-                    · Last: <span className={statusColor[lastPost.status] ?? "text-slate-400"}>{lastPost.status}</span>
+    <>
+      <div className="flex flex-col gap-3">
+        {campaigns.map((c) => {
+          const lastPost = c.posts[0];
+          const nextRun = new Date(c.nextRunAt).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" });
+          return (
+            <div key={c.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span>{platformIcons[c.platform] ?? "📱"}</span>
+                  <p className="font-medium">{c.name}</p>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${c.isActive ? "bg-emerald-900/50 text-emerald-400" : "bg-slate-800 text-slate-500"}`}>
+                    {c.isActive ? "active" : "paused"}
                   </span>
-                )}
-              </p>
+                </div>
+                <p className="text-slate-500 text-xs">
+                  Every {c.intervalHours}h · @{c.channelUser} · {c._count.posts} posts total
+                </p>
+                <p className="text-slate-600 text-xs mt-0.5">
+                  Next run: {nextRun}
+                  {lastPost && (
+                    <span className="ml-2">
+                      · Last: <span className={statusColor[lastPost.status] ?? "text-slate-400"}>{lastPost.status}</span>
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setEditing(c)}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-sky-600 text-slate-400 hover:text-sky-300 transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => toggle(c.id, !c.isActive)}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  {c.isActive ? "Pause" : "Resume"}
+                </button>
+                <button
+                  onClick={() => remove(c.id)}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-rose-900 text-rose-400 hover:bg-rose-900/20 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => toggle(c.id, !c.isActive)}
-                className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 text-slate-400 hover:text-slate-200 transition-colors"
-              >
-                {c.isActive ? "Pause" : "Resume"}
-              </button>
-              <button
-                onClick={() => remove(c.id)}
-                className="text-xs px-3 py-1.5 rounded-lg border border-rose-900 text-rose-400 hover:bg-rose-900/20 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+
+      {editing && (
+        <EditCampaignModal
+          campaign={editing}
+          onClose={() => setEditing(null)}
+          onSaved={handleSaved}
+        />
+      )}
+    </>
   );
 }
