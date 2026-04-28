@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `File too large: ${file.name}` }, { status: 400 });
     }
 
-    const blob = await put(`campaigns/${Date.now()}-${file.name}`, file, {
+    const ext = file.type === "image/webp" ? "webp" : file.type === "image/png" ? "png" : "jpg";
+    const safeName = `campaigns/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    const blob = await put(safeName, file, {
       access: "public",
     });
     urls.push(blob.url);
